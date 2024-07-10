@@ -14,10 +14,7 @@ import { DeleteAccountDto } from './dto/deleteAccountDto';
 
 @Injectable()
 export class AuthService {
-    deleteAccount(userId: any, deleteAccountDto: DeleteAccountDto) {
-        throw new Error('Method not implemented.');
-    }
-
+    
   constructor(
     private readonly prismaService: PrismaService,
     private readonly mailerService: MailerService, 
@@ -102,9 +99,13 @@ export class AuthService {
         const hash = await bcrypt.hash(password, 10);
         await this.prismaService.user.update({where: {email},data:{password:hash}});
         return {data: `Votre mot de passe a été réinitialisé avec succès`};
-
-        async deleteAccount(userId: number, deleteAccountDto: DeleteAccountDto) {
-            
-        }
+     
+    }
+    async deleteAccount(userId: number, deleteAccountDto: DeleteAccountDto) {
+        const {password} = deleteAccountDto;
+        const user = await this.prismaService.user.findUnique({ where: { userId } });
+        if(!user) throw new NotFoundException(`L'utilisateur n'existe pas`);
+        this.prismaService.user.delete({where: {userId}});
+        return {data: `Votre compte a été supprimé avec succès`};
     }
 }
